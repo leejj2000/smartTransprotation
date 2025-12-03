@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 /**
  * 交通数据分析服务
  * 为AI助手提供数据查询和分析能力
- * 
+ *
  * @author pojin
  * @date 2025/11/23
  */
@@ -100,25 +100,25 @@ public class TrafficDataAnalysisService {
      */
     private String analyzeAccidents(String query) {
         try {
-            // 获取最近的事故数据
-            LocalDateTime endTime = LocalDateTime.now();
-            LocalDateTime startTime = endTime.minusDays(30);
-            
+            // 获取2024年2月的事故数据
+            LocalDate startTime = LocalDate.of(2024, 2, 1);
+            LocalDate endTime = LocalDate.of(2024, 2, 28);
+
             List<TrafficAccident> recentAccidents = trafficAccidentRepository
                 .findByDateRange(startTime, endTime);
 
             if (recentAccidents.isEmpty()) {
-                return "最近30天内暂无交通事故记录。";
+                return "2024年2月暂无交通事故记录。";
             }
 
             StringBuilder result = new StringBuilder();
-            result.append(String.format("最近30天共发生 %d 起交通事故\n", recentAccidents.size()));
+            result.append(String.format("2024年2月共发生 %d 起交通事故\n", recentAccidents.size()));
 
             // 统计严重程度
             long severeAccidents = recentAccidents.stream()
                 .filter(TrafficAccident::isSevere)
                 .count();
-            
+
             if (severeAccidents > 0) {
                 result.append(String.format("其中严重事故 %d 起\n", severeAccidents));
             }
@@ -158,18 +158,19 @@ public class TrafficDataAnalysisService {
      */
     private String analyzeWeather(String query) {
         try {
-            LocalDateTime endTime = LocalDateTime.now();
-            LocalDateTime startTime = endTime.minusDays(7);
-            
+            // 获取2024年2月的天气数据
+            LocalDate startTime = LocalDate.of(2024, 2, 1);
+            LocalDate endTime = LocalDate.of(2024, 2, 28);
+
             List<WeatherData> recentWeather = weatherDataRepository
                 .findByDateRange(startTime, endTime);
 
             if (recentWeather.isEmpty()) {
-                return "最近7天暂无天气数据记录。";
+                return "2024年2月暂无天气数据记录。";
             }
 
             StringBuilder result = new StringBuilder();
-            result.append(String.format("最近7天天气数据（共 %d 条记录）\n", recentWeather.size()));
+            result.append(String.format("2024年2月天气数据（共 %d 条记录）\n", recentWeather.size()));
 
             // 统计恶劣天气
             long severeWeatherDays = recentWeather.stream()
@@ -210,18 +211,19 @@ public class TrafficDataAnalysisService {
      */
     private String analyzeRidership(String query) {
         try {
-            LocalDateTime endTime = LocalDateTime.now();
-            LocalDateTime startTime = endTime.minusDays(7);
-            
+            // 获取2024年2月的地铁客流数据
+            LocalDate startTime = LocalDate.of(2024, 2, 1);
+            LocalDate endTime = LocalDate.of(2024, 2, 28);
+
             List<SubwayRidership> recentRidership = subwayRidershipRepository
                 .findByDateRange(startTime, endTime);
 
             if (recentRidership.isEmpty()) {
-                return "最近7天暂无地铁客流数据。";
+                return "2024年2月暂无地铁客流数据。";
             }
 
             StringBuilder result = new StringBuilder();
-            result.append(String.format("最近7天地铁客流数据（共 %d 条记录）\n", recentRidership.size()));
+            result.append(String.format("2024年2月地铁客流数据（共 %d 条记录）\n", recentRidership.size()));
 
             // 计算总客流量
             long totalRidership = recentRidership.stream()
@@ -247,18 +249,19 @@ public class TrafficDataAnalysisService {
      */
     private String analyzeEvents(String query) {
         try {
-            LocalDateTime endTime = LocalDateTime.now();
-            LocalDateTime startTime = endTime.minusDays(30);
-            
+            // 获取2024年2月的许可事件数据
+            LocalDate startTime = LocalDate.of(2024, 2, 1);
+            LocalDate endTime = LocalDate.of(2024, 2, 28);
+
             List<PermittedEvent> recentEvents = permittedEventRepository
                 .findByDateRange(startTime, endTime);
 
             if (recentEvents.isEmpty()) {
-                return "最近30天暂无许可事件记录。";
+                return "2024年2月暂无许可事件记录。";
             }
 
             StringBuilder result = new StringBuilder();
-            result.append(String.format("最近30天许可事件（共 %d 个）\n", recentEvents.size()));
+            result.append(String.format("2024年2月许可事件（共 %d 个）\n", recentEvents.size()));
 
             // 统计高影响事件
             long highImpactEvents = recentEvents.stream()
@@ -298,7 +301,7 @@ public class TrafficDataAnalysisService {
         overview.append("• 地铁客流量变化\n");
         overview.append("• 许可事件对交通的影响\n");
         overview.append("请告诉我您想了解哪方面的具体信息。");
-        
+
         return overview.toString();
     }
 

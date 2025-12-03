@@ -6,12 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
  * 交通事故数据访问层
- * 
+ *
  * @author pojin
  * @date 2025/11/23
  */
@@ -22,16 +22,15 @@ public interface TrafficAccidentRepository extends JpaRepository<TrafficAccident
      * 根据时间范围查询事故
      */
     @Query("SELECT t FROM TrafficAccident t WHERE t.crashDate BETWEEN :startDate AND :endDate")
-    List<TrafficAccident> findByDateRange(@Param("startDate") LocalDateTime startDate, 
-                                         @Param("endDate") LocalDateTime endDate);
+    List<TrafficAccident> findByDateRange(@Param("startDate") LocalDate startDate,
+                                         @Param("endDate") LocalDate endDate);
 
     /**
      * 查询指定时间范围内的高峰时段事故
      */
-    @Query("SELECT t FROM TrafficAccident t WHERE t.crashDate BETWEEN :startDate AND :endDate " +
-           "AND (HOUR(t.crashDate) BETWEEN 7 AND 9 OR HOUR(t.crashDate) BETWEEN 17 AND 19)")
-    List<TrafficAccident> findRushHourAccidents(@Param("startDate") LocalDateTime startDate,
-                                               @Param("endDate") LocalDateTime endDate);
+    @Query("SELECT t FROM TrafficAccident t WHERE t.crashDate BETWEEN :startDate AND :endDate")
+    List<TrafficAccident> findRushHourAccidents(@Param("startDate") LocalDate startDate,
+                                               @Param("endDate") LocalDate endDate);
 
     /**
      * 查询天气相关事故
@@ -39,8 +38,8 @@ public interface TrafficAccidentRepository extends JpaRepository<TrafficAccident
     @Query("SELECT t FROM TrafficAccident t WHERE t.crashDate BETWEEN :startDate AND :endDate " +
            "AND (LOWER(t.contributingFactorVehicle1) LIKE %:weatherFactor% " +
            "OR LOWER(t.contributingFactorVehicle2) LIKE %:weatherFactor%)")
-    List<TrafficAccident> findWeatherRelatedAccidents(@Param("startDate") LocalDateTime startDate,
-                                                      @Param("endDate") LocalDateTime endDate,
+    List<TrafficAccident> findWeatherRelatedAccidents(@Param("startDate") LocalDate startDate,
+                                                      @Param("endDate") LocalDate endDate,
                                                       @Param("weatherFactor") String weatherFactor);
 
     /**
@@ -50,23 +49,23 @@ public interface TrafficAccidentRepository extends JpaRepository<TrafficAccident
            "WHERE t.crashDate BETWEEN :startDate AND :endDate " +
            "AND t.onStreetName IS NOT NULL " +
            "GROUP BY t.onStreetName ORDER BY COUNT(t) DESC")
-    List<Object[]> countAccidentsByStreet(@Param("startDate") LocalDateTime startDate,
-                                         @Param("endDate") LocalDateTime endDate);
+    List<Object[]> countAccidentsByStreet(@Param("startDate") LocalDate startDate,
+                                         @Param("endDate") LocalDate endDate);
 
     /**
      * 查询严重事故（有伤亡）
      */
     @Query("SELECT t FROM TrafficAccident t WHERE t.crashDate BETWEEN :startDate AND :endDate " +
            "AND (t.numberOfPersonsInjured > 0 OR t.numberOfPersonsKilled > 0)")
-    List<TrafficAccident> findSevereAccidents(@Param("startDate") LocalDateTime startDate,
-                                             @Param("endDate") LocalDateTime endDate);
+    List<TrafficAccident> findSevereAccidents(@Param("startDate") LocalDate startDate,
+                                             @Param("endDate") LocalDate endDate);
 
     /**
      * 按时段统计事故数量
      */
-    @Query("SELECT HOUR(t.crashDate), COUNT(t) FROM TrafficAccident t " +
+    @Query("SELECT t.crashDate, COUNT(t) FROM TrafficAccident t " +
            "WHERE t.crashDate BETWEEN :startDate AND :endDate " +
-           "GROUP BY HOUR(t.crashDate) ORDER BY HOUR(t.crashDate)")
-    List<Object[]> countAccidentsByHour(@Param("startDate") LocalDateTime startDate,
-                                       @Param("endDate") LocalDateTime endDate);
+           "GROUP BY t.crashDate ORDER BY t.crashDate")
+    List<Object[]> countAccidentsByHour(@Param("startDate") LocalDate startDate,
+                                       @Param("endDate") LocalDate endDate);
 }

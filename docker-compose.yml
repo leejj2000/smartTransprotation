@@ -12,6 +12,8 @@ services:
     volumes:
       - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/etcd:/etcd
     command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls=http://0.0.0.0:2379 --data-dir /etcd
+    networks:
+      - milvus
 
   minio:
     container_name: milvus-minio
@@ -30,6 +32,8 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    networks:
+      - milvus
 
   standalone:
     container_name: milvus-standalone
@@ -46,20 +50,32 @@ services:
     depends_on:
       - "etcd"
       - "minio"
+    networks:
+      - milvus
 
   mysql:
     image: mysql:8.0
     container_name: smart-transport-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: Qwert_1245
       MYSQL_DATABASE: smart_transportation
     ports:
       - "3306:3306"
     volumes:
-      - ./agent.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./smart_transportation.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - default
 
   redis:
     image: redis:latest
     container_name: smart-transport-redis
     ports:
       - "6379:6379"
+    networks:
+      - default
+
+networks:
+  milvus:
+    driver: bridge
+  default:
+    driver: bridge

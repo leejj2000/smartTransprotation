@@ -8,6 +8,7 @@ import org.example.smarttransportation.repository.ComplaintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * 数据驱动治理服务
  * 实现场景三：事后·数据驱动治理 (Data-Driven Governance)
- * 
+ *
  * @author T-Agent
  * @version 1.0
  */
@@ -24,16 +25,16 @@ public class DataGovernanceService {
 
     @Autowired
     private TrafficAccidentRepository trafficAccidentRepository;
-    
+
     @Autowired
     private ComplaintRepository complaintRepository;
-    
+
     @Autowired
     private RAGService ragService;
 
     /**
      * 生成事故黑点综合治理方案建议书
-     * 
+     *
      * @param location 事故多发地点
      * @param timeRangeStart 时间范围开始
      * @param timeRangeEnd 时间范围结束
@@ -41,37 +42,37 @@ public class DataGovernanceService {
      */
     public GovernanceProposal generateGovernanceProposal(String location, LocalDateTime timeRangeStart, LocalDateTime timeRangeEnd) {
         GovernanceProposal proposal = new GovernanceProposal();
-        
+
         // 设置基本信息
         proposal.setLocation(location);
-        proposal.setTimeRange(String.format("%s 至 %s", 
-            timeRangeStart.toLocalDate().toString(), 
+        proposal.setTimeRange(String.format("%s 至 %s",
+            timeRangeStart.toLocalDate().toString(),
             timeRangeEnd.toLocalDate().toString()));
-        
+
         // 分析事故数据
         AccidentAnalysis accidentAnalysis = analyzeAccidents(location, timeRangeStart, timeRangeEnd);
         proposal.setAccidentAnalysis(accidentAnalysis);
-        
+
         // 分析投诉数据
         ComplaintAnalysis complaintAnalysis = analyzeComplaints(location, timeRangeStart, timeRangeEnd);
         proposal.setComplaintAnalysis(complaintAnalysis);
-        
+
         // 生成问题诊断
         String diagnosis = generateDiagnosis(accidentAnalysis, complaintAnalysis);
         proposal.setProblemDiagnosis(diagnosis);
-        
+
         // 生成短期措施（治标）
         List<String> shortTermMeasures = generateShortTermMeasures(accidentAnalysis, complaintAnalysis);
         proposal.setShortTermMeasures(shortTermMeasures);
-        
+
         // 生成长期措施（治本）
         List<String> longTermMeasures = generateLongTermMeasures(accidentAnalysis, complaintAnalysis);
         proposal.setLongTermMeasures(longTermMeasures);
-        
+
         // 获取参考案例
         List<String> referenceCases = getReferenceCases(location);
         proposal.setReferenceCases(referenceCases);
-        
+
         return proposal;
     }
 
@@ -80,9 +81,11 @@ public class DataGovernanceService {
      */
     private AccidentAnalysis analyzeAccidents(String location, LocalDateTime start, LocalDateTime end) {
         AccidentAnalysis analysis = new AccidentAnalysis();
-        
-        // 查询事故数据
-        List<TrafficAccident> allAccidents = trafficAccidentRepository.findByDateRange(start, end);
+
+        // 查询事故数据 (修复：将LocalDateTime转换为LocalDate)
+        LocalDate startDate = start.toLocalDate();
+        LocalDate endDate = end.toLocalDate();
+        List<TrafficAccident> allAccidents = trafficAccidentRepository.findByDateRange(startDate, endDate);
         // 过滤指定位置的事故数据
         List<TrafficAccident> accidents = allAccidents.stream()
             .filter(accident -> {
@@ -155,17 +158,23 @@ public class DataGovernanceService {
         Map<String, Long> timeDistribution = accidents.stream()
             .collect(Collectors.groupingBy(
                 accident -> {
-                    int hour = accident.getCrashDate().getHour();
-                    if (hour >= 6 && hour < 12) {
-                        return "上午(6-12)";
+                    // 修复：从LocalDate获取小时信息会报错，需要从字符串解析时间
+                    try {
+                        String[] timeParts = accident.getCrashTime().split(":");
+                        int hour = Integer.parseInt(timeParts[0]);
+                        if (hour >= 6 && hour < 12) {
+                            return "上午(6-12)";
+                        }
+                        if (hour >= 12 && hour < 18) {
+                            return "下午(12-18)";
+                        }
+                        if (hour >= 18 && hour < 24) {
+                            return "晚上(18-24)";
+                        }
+                        return "凌晨(0-6)";
+                    } catch (Exception e) {
+                        return "未知时段";
                     }
-                    if (hour >= 12 && hour < 18) {
-                        return "下午(12-18)";
-                    }
-                    if (hour >= 18 && hour < 24) {
-                        return "晚上(18-24)";
-                    }
-                    return "凌晨(0-6)";
                 },
                 Collectors.counting()
             ));
@@ -180,7 +189,7 @@ public class DataGovernanceService {
     private ComplaintAnalysis analyzeComplaints(String location, LocalDateTime start, LocalDateTime end) {
         ComplaintAnalysis analysis = new ComplaintAnalysis();
 
-        // 查询投诉数据
+        // 查询投诉数据 (修复：保持使用LocalDateTime参数)
         List<Complaint> complaints = complaintRepository.findByLocationAndDateRange(location, start, end);
 
         analysis.setTotalComplaints(complaints.size());
@@ -196,6 +205,7 @@ public class DataGovernanceService {
         // 统计投诉频率趋势（按月份）
         Map<String, Long> frequencyTrend = complaints.stream()
             .collect(Collectors.groupingBy(
+                // 修复：从LocalDate获取小时信息会报错
                 complaint -> complaint.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM")),
                 Collectors.counting()
             ));

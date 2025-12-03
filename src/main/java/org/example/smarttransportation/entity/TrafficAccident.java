@@ -1,6 +1,8 @@
 package org.example.smarttransportation.entity;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
 
@@ -17,76 +19,76 @@ public class TrafficAccident extends TransportationData {
     @Id
     @Column(name = "collision_id")
     private Long collisionId;
-    
-    @Column(name = "crash_date")
-    private LocalDateTime crashDate;
-    
+
+    @Column(name = "CRASH DATE")
+    private LocalDate crashDate;
+
     @Column(name = "crash_time")
     private String crashTime;
-    
+
     @Column(name = "on_street_name", length = 128)
     private String onStreetName;
-    
+
     @Column(name = "cross_street_name", length = 128)
     private String crossStreetName;
-    
+
     @Column(name = "off_street_name", length = 128)
     private String offStreetName;
-    
+
     @Column(name = "number_of_persons_injured")
     private Integer numberOfPersonsInjured;
-    
+
     @Column(name = "number_of_persons_killed")
     private Integer numberOfPersonsKilled;
-    
+
     @Column(name = "number_of_pedestrians_injured")
     private Integer numberOfPedestriansInjured;
-    
+
     @Column(name = "number_of_pedestrians_killed")
     private Integer numberOfPedestriansKilled;
-    
+
     @Column(name = "number_of_cyclist_injured")
     private Integer numberOfCyclistInjured;
-    
+
     @Column(name = "number_of_cyclist_killed")
     private Integer numberOfCyclistKilled;
-    
+
     @Column(name = "number_of_motorist_injured")
     private Integer numberOfMotoristInjured;
-    
+
     @Column(name = "number_of_motorist_killed")
     private Integer numberOfMotoristKilled;
-    
+
     @Column(name = "contributing_factor_vehicle_1", length = 128)
     private String contributingFactorVehicle1;
-    
+
     @Column(name = "contributing_factor_vehicle_2", length = 128)
     private String contributingFactorVehicle2;
-    
+
     @Column(name = "contributing_factor_vehicle_3", length = 128)
     private String contributingFactorVehicle3;
-    
+
     @Column(name = "contributing_factor_vehicle_4", length = 128)
     private String contributingFactorVehicle4;
-    
+
     @Column(name = "contributing_factor_vehicle_5", length = 128)
     private String contributingFactorVehicle5;
-    
+
     @Column(name = "unique_key")
     private String uniqueKey;
-    
+
     @Column(name = "vehicle_type_code1", length = 64)
     private String vehicleTypeCode1;
-    
+
     @Column(name = "vehicle_type_code2", length = 64)
     private String vehicleTypeCode2;
-    
+
     @Column(name = "vehicle_type_code_3", length = 64)
     private String vehicleTypeCode3;
-    
+
     @Column(name = "vehicle_type_code_4", length = 64)
     private String vehicleTypeCode4;
-    
+
     @Column(name = "vehicle_type_code_5", length = 64)
     private String vehicleTypeCode5;
 
@@ -99,11 +101,11 @@ public class TrafficAccident extends TransportationData {
         this.collisionId = collisionId;
     }
 
-    public LocalDateTime getCrashDate() {
+    public LocalDate getCrashDate() {
         return crashDate;
     }
 
-    public void setCrashDate(LocalDateTime crashDate) {
+    public void setCrashDate(LocalDate crashDate) {
         this.crashDate = crashDate;
     }
 
@@ -313,20 +315,8 @@ public class TrafficAccident extends TransportationData {
      * 获取事故时段描述
      */
     public String getTimeSlotDescription() {
-        if (crashDate == null) {
-            return "未知时段";
-        }
-        
-        int hour = crashDate.getHour();
-        if (hour >= 7 && hour <= 9) {
-            return "早高峰";
-        } else if (hour >= 17 && hour <= 19) {
-            return "晚高峰";
-        } else if (hour >= 22 || hour <= 5) {
-            return "深夜时段";
-        } else {
-            return "平峰时段";
-        }
+        // 由于只有日期信息，无法确定具体时段
+        return "未知时段";
     }
 
     /**

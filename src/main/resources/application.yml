@@ -8,13 +8,13 @@ spring:
     allow-bean-definition-overriding: true
   ai:
     dashscope:
-      api-key: {your-api-key}
+      api-key: sk-012834a6b13349a79a98c3d7723b6851
 
   # MySQL 数据库配置
   datasource:
     url: jdbc:mysql://localhost:3306/smart_transportation?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: {your-username}
-    password: {your-password}
+    username: root
+    password: Qwert_1245
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   # JPA 配置
